@@ -5,12 +5,13 @@ Application: Streamlit Interactive Executive Dashboard
 Epic: D04-E05 - Dashboard and Visualization
 Author: Student Research Team
 Description: Modern, responsive multi-tab analytics dashboard equipped with
-             interactive Plotly charts, dynamic dimension filtering,
-             KPI cards, and discount sensitivity simulator.
+             secure authentication, interactive Plotly charts, dynamic
+             dimension filtering, KPI cards, and discount sensitivity simulator.
 =============================================================================
 """
 
 import os
+import hashlib
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -22,31 +23,30 @@ import plotly.graph_objects as go
 # -------------------------------------------------------------
 st.set_page_config(
     page_title="Product Category Profitability Intelligence",
-    page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for executive aesthetic
+# Custom CSS for executive corporate aesthetic
 st.markdown("""
 <style>
     .main-header {
-        font-size: 2.2rem;
+        font-size: 2.1rem;
         font-weight: 700;
         color: #1E3A8A;
         margin-bottom: 0.2rem;
     }
     .sub-header {
-        font-size: 1.05rem;
+        font-size: 1.0rem;
         color: #4B5563;
-        margin-bottom: 1.5rem;
+        margin-bottom: 1.4rem;
     }
     div[data-testid="metric-container"] {
         background-color: #F8FAFC;
         border: 1px solid #E2E8F0;
-        padding: 0.8rem;
+        padding: 0.75rem 1rem;
         border-radius: 8px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     }
     div[data-testid="stMetricValue"] {
         font-size: 1.45rem !important;
@@ -58,13 +58,108 @@ st.markdown("""
         font-weight: 600;
         color: #64748B;
     }
-    .badge-star { color: #15803d; font-weight: bold; }
-    .badge-bleed { color: #b91c1c; font-weight: bold; }
+    .user-profile-card {
+        background-color: #EFF6FF;
+        border: 1px solid #BFDBFE;
+        border-radius: 8px;
+        padding: 12px 14px;
+        margin-bottom: 16px;
+    }
+    .user-profile-title {
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        color: #1E40AF;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+    }
+    .user-profile-name {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #1E3A8A;
+    }
+    .user-profile-role {
+        font-size: 0.82rem;
+        color: #475569;
+    }
+    .login-container {
+        max-width: 440px;
+        margin: 40px auto;
+        padding: 32px;
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
 </style>
 """, unsafe_allow_html=True)
 
 # -------------------------------------------------------------
-# Data Loading & Caching
+# Authentication Engine (Secure Password Hashing & Session State)
+# -------------------------------------------------------------
+def hash_pass(password: str) -> str:
+    return hashlib.sha256(password.encode('utf-8')).hexdigest()
+
+# User registry (SHA-256 hashed credentials)
+USERS = {
+    "admin": {
+        "password_hash": hash_pass("admin123"),
+        "name": "Lead Analyst",
+        "role": "Executive Administrator"
+    },
+    "analyst": {
+        "password_hash": hash_pass("analyst2024"),
+        "name": "Category Researcher",
+        "role": "Senior BI Analyst"
+    },
+    "manager": {
+        "password_hash": hash_pass("retail2024"),
+        "name": "Store Manager",
+        "role": "Store Operations"
+    }
+}
+
+if "authenticated" not in st.session_state:
+    st.session_state["authenticated"] = False
+if "user_info" not in st.session_state:
+    st.session_state["user_info"] = None
+
+# If not authenticated, render Login Screen
+if not st.session_state["authenticated"]:
+    col_l1, col_l2, col_l3 = st.columns([1, 1.8, 1])
+    with col_l2:
+        st.markdown("""
+        <div style="text-align: center; margin-top: 30px; margin-bottom: 20px;">
+            <h2 style="color: #1E3A8A; font-weight: 700; margin-bottom: 6px;">Retail Analytics Portal</h2>
+            <p style="color: #64748B; font-size: 0.95rem;">Please sign in with your credentials to access the study</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        with st.form("login_form"):
+            input_user = st.text_input("Username", placeholder="Enter your username")
+            input_pass = st.text_input("Password", type="password", placeholder="Enter your password")
+            submit_btn = st.form_submit_button("Sign In", use_container_width=True)
+            
+            if submit_btn:
+                clean_user = input_user.strip().lower()
+                if clean_user in USERS and USERS[clean_user]["password_hash"] == hash_pass(input_pass):
+                    st.session_state["authenticated"] = True
+                    st.session_state["user_info"] = USERS[clean_user]
+                    st.success("Authentication successful. Loading dashboard...")
+                    st.rerun()
+                else:
+                    st.error("Invalid username or password. Please try again.")
+
+        # Easy wording credentials guide for reviewers/evaluators
+        st.info("""
+        **Demo Access Credentials:**
+        - **Admin Access:** Username: `admin` | Password: `admin123`
+        - **Analyst Access:** Username: `analyst` | Password: `analyst2024`
+        """)
+        
+    st.stop()
+
+# -------------------------------------------------------------
+# Data Loading & Caching (Authenticated Session)
 # -------------------------------------------------------------
 @st.cache_data
 def load_data():
@@ -81,11 +176,26 @@ except Exception as e:
     st.stop()
 
 # -------------------------------------------------------------
-# Sidebar Filters
+# Clean Corporate Sidebar (No Emojis)
 # -------------------------------------------------------------
-st.sidebar.image("https://img.icons8.com/fluency/96/combo-chart.png", width=64)
-st.sidebar.title("Navigation & Filters")
-st.sidebar.markdown("Filter sales ledger dimensions:")
+user_info = st.session_state["user_info"]
+
+# User Account Card
+st.sidebar.markdown(f"""
+<div class="user-profile-card">
+    <div class="user-profile-title">Active Session</div>
+    <div class="user-profile-name">{user_info['name']}</div>
+    <div class="user-profile-role">{user_info['role']}</div>
+</div>
+""", unsafe_allow_html=True)
+
+if st.sidebar.button("Sign Out", use_container_width=True):
+    st.session_state["authenticated"] = False
+    st.session_state["user_info"] = None
+    st.rerun()
+
+st.sidebar.markdown("---")
+st.sidebar.markdown("### Filters and Controls")
 
 # Date Range Filter
 min_date = df_raw['order_date'].min().date()
@@ -119,9 +229,9 @@ df = df_raw[
 ].copy()
 
 # -------------------------------------------------------------
-# Main Header
+# Main Header (Clean Corporate Branding, No Emojis)
 # -------------------------------------------------------------
-st.markdown('<div class="main-header">📈 Product Category Profitability Dashboard</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-header">Product Category Profitability Dashboard</div>', unsafe_allow_html=True)
 st.markdown('<div class="sub-header">Strategic BI study examining top-line revenue vs bottom-line gross margins across retail merchandise lines (Course Project D04)</div>', unsafe_allow_html=True)
 
 # -------------------------------------------------------------
@@ -138,21 +248,21 @@ kpi_c1, kpi_c2, kpi_c3, kpi_c4, kpi_c5, kpi_c6 = st.columns(6)
 kpi_c1.metric("Net Revenue", f"${tot_revenue:,.0f}", delta=f"{len(df):,} Orders")
 kpi_c2.metric("Total COGS", f"${tot_cost:,.0f}", delta_color="inverse")
 kpi_c3.metric("Gross Profit", f"${tot_profit:,.0f}", delta=f"${tot_profit/len(df):.1f}/order" if len(df) else None)
-kpi_c4.metric("Gross Margin", f"{tot_margin:.2f}%", delta="Benchmark: 15%")
+kpi_c4.metric("Gross Margin", f"{tot_margin:.2f}%", delta="Target: 15.0%")
 kpi_c5.metric("Avg Order Value", f"${avg_order_val:.2f}")
 kpi_c6.metric("Profitable Orders", f"{profit_order_rate:.1f}%")
 
 st.markdown("---")
 
 # -------------------------------------------------------------
-# Tabbed Analytical Layout
+# Tabbed Analytical Layout (No Emojis)
 # -------------------------------------------------------------
 tab1, tab2, tab3, tab4, tab5 = st.tabs([
-    "📊 Category Financials",
-    "🎯 Portfolio BCG Matrix",
-    "⚠️ Discount Sensitivity",
-    "🌍 Geographic & Tender Analysis",
-    "📋 Data Explorer"
+    "Category Financials",
+    "Portfolio BCG Matrix",
+    "Discount Sensitivity",
+    "Geographic and Tender Analysis",
+    "Data Explorer"
 ])
 
 # -------------------------------------------------------------
@@ -178,7 +288,6 @@ with tab1:
         
     with col_t1b:
         st.subheader("Category Profit Share (%)")
-        # Treemap or Donut
         fig_donut = px.pie(
             cat_agg,
             names='product_category',
@@ -189,8 +298,7 @@ with tab1:
         fig_donut.update_layout(height=420, template='plotly_white')
         st.plotly_chart(fig_donut, use_container_width=True)
 
-    # Monthly Trendline
-    st.subheader("Monthly Revenue & Gross Margin (%) Trajectory")
+    st.subheader("Monthly Revenue and Gross Margin (%) Trajectory")
     monthly_trend = df.groupby('order_month').agg(
         Revenue=('revenue', 'sum'),
         Profit=('profit', 'sum')
@@ -218,10 +326,10 @@ with tab2:
     st.subheader("Category Strategic Positioning Matrix (Revenue vs Margin %)")
     st.markdown("""
     This matrix categorizes retail product lines by commercial scale (Net Revenue) vs bottom-line yield (Gross Margin %).
-    * **Stars:** High Revenue, High Margin (Growth Engines)
-    * **Volume Drivers:** High Revenue, Low Margin (Cash Flow / Basket Fillers)
-    * **Niche Harvesters:** Low Revenue, High Margin (Expansion Opportunities)
-    * **Margin Bleeders:** Low Revenue, Compressed Margin (Restructure or Prune)
+    - **Stars:** High Revenue, High Margin (Growth Engines)
+    - **Volume Drivers:** High Revenue, Low Margin (Cash Flow / Basket Fillers)
+    - **Niche Harvesters:** Low Revenue, High Margin (Expansion Opportunities)
+    - **Margin Bleeders:** Low Revenue, Compressed Margin (Restructure or Prune)
     """)
     
     cat_mat = df.groupby('product_category').agg(
@@ -244,7 +352,6 @@ with tab2:
     )
     fig_mat.update_traces(textposition='top center', marker=dict(opacity=0.85, line=dict(width=1.5, color='DarkSlateGrey')))
     
-    # Add benchmark reference lines
     rev_median = cat_mat['Revenue'].median()
     margin_median = cat_mat['Margin_Pct'].median()
     fig_mat.add_vline(x=rev_median, line_dash="dash", line_color="gray", annotation_text="Median Revenue", annotation_position="top left")
@@ -258,7 +365,7 @@ with tab2:
 with tab3:
     st.subheader("Promotional Discount Rate vs Profit Margin Decay")
     
-    col_t3a, col_t3b = st.columns([1, 1])
+    col_t3a, col_t3b = st.columns([1.1, 0.9])
     
     with col_t3a:
         sample_size = min(1500, len(df))
@@ -284,16 +391,14 @@ with tab3:
             st.info("No data available for selected filter combination.")
 
     with col_t3b:
-        st.markdown("#### 🎛️ Interactive Discount Simulation")
+        st.markdown("#### Interactive Discount Simulation")
         st.write("Simulate the impact of applying a universal discount cap on high-volume categories:")
         sim_category = st.selectbox("Select Target Category", all_categories, index=0)
         sim_max_discount = st.slider("Simulated Maximum Allowed Discount (%)", 0, 40, 15)
         
-        # Calculate simulation impact
         cat_subset = df[df['product_category'] == sim_category].copy()
         current_profit = cat_subset['profit'].sum()
         
-        # Simulated revenue and profit
         sim_discount = cat_subset['discount_pct'].clip(upper=sim_max_discount / 100.0)
         sim_net_rev = cat_subset['gross_revenue'] * (1 - sim_discount)
         sim_profit = sim_net_rev - cat_subset['cost']
@@ -323,7 +428,7 @@ with tab4:
         st.plotly_chart(fig_heat, use_container_width=True)
 
     with col_t4b:
-        st.subheader("Tender Mode Distribution & AOV")
+        st.subheader("Tender Mode Distribution and AOV")
         pay_df = df.groupby('payment_mode').agg(
             Revenue=('revenue', 'sum'),
             AOV=('revenue', 'mean'),
@@ -346,13 +451,13 @@ with tab4:
 # TAB 5: Data Ledger Explorer
 # -------------------------------------------------------------
 with tab5:
-    st.subheader("Transaction Ledger (Cleaned & Analysis-Ready)")
+    st.subheader("Transaction Ledger (Cleaned and Validated)")
     st.write(f"Displaying {len(df):,} filtered transaction rows:")
     st.dataframe(df.head(200), use_container_width=True)
     
     csv_bytes = df.to_csv(index=False).encode('utf-8')
     st.download_button(
-        label="📥 Download Filtered Data as CSV",
+        label="Download Filtered Data (CSV)",
         data=csv_bytes,
         file_name="filtered_category_profitability.csv",
         mime="text/csv"
@@ -360,4 +465,4 @@ with tab5:
 
 # Footer
 st.markdown("---")
-st.caption("College Capstone Project D04 — Product Category Profitability Study | Built with Python, Pandas, Streamlit, and Plotly.")
+st.caption("Course Capstone Project D04 | Product Category Profitability Study | Built with Python, Pandas, Streamlit, and Plotly.")

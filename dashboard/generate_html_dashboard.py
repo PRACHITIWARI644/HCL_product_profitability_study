@@ -244,7 +244,7 @@ def build_standalone_html_dashboard():
 <body>
 
     <div class="header">
-        <h1>📊 Product Category Profitability Executive Dashboard</h1>
+        <h1>Product Category Profitability Executive Dashboard</h1>
         <p>Retail Analytics & Business Intelligence Portfolio Study (Project D04) | Omnichannel Enterprise Ledger</p>
         <span class="badge">Dataset Horizon: 2023 - 2024 (8,475 Validated Transactions)</span>
     </div>
@@ -315,7 +315,7 @@ def build_standalone_html_dashboard():
 
     <!-- Key Strategic Takeaways -->
     <div class="insights-panel">
-        <h2>💡 Key Strategic Findings & Recommendations</h2>
+        <h2>Key Strategic Findings and Recommendations</h2>
         <ul>
             <li><b>Electronics Dilemma:</b> Drives <b>54.2%</b> of total sales ($1.42M) but commands a slim <b>8.52% margin</b>. High discounts in Q4 push multiple SKUs underwater. <i>Recommendation: Institute a hard discount cap of 12% on high-ticket tech products.</i></li>
             <li><b>Furniture Margin Crisis:</b> Generates $314.8K revenue (12.0%) but delivers a staggering <b>1.34% net margin</b> ($4,228 profit). <i>Recommendation: Restructure supplier procurement contracts and charge logistics handling fees for bulky items.</i></li>
