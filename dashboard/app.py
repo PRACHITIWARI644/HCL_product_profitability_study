@@ -44,9 +44,19 @@ st.markdown("""
     div[data-testid="metric-container"] {
         background-color: #F8FAFC;
         border: 1px solid #E2E8F0;
-        padding: 1rem;
+        padding: 0.8rem;
         border-radius: 8px;
         box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    div[data-testid="stMetricValue"] {
+        font-size: 1.45rem !important;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+    div[data-testid="stMetricLabel"] {
+        font-size: 0.85rem !important;
+        font-weight: 600;
+        color: #64748B;
     }
     .badge-star { color: #15803d; font-weight: bold; }
     .badge-bleed { color: #b91c1c; font-weight: bold; }
@@ -251,19 +261,27 @@ with tab3:
     col_t3a, col_t3b = st.columns([1, 1])
     
     with col_t3a:
-        fig_scatter = px.scatter(
-            df.sample(min(1500, len(df)), random_state=42),
-            x=df['discount_pct'] * 100,
-            y='profit_margin_pct',
-            color='product_category',
-            opacity=0.65,
-            trendline="ols",
-            labels={'x': 'Promotional Discount Applied (%)', 'profit_margin_pct': 'Profit Margin (%)'},
-            title="Margin Decay Correlation (Sampled Transactions)",
-            template='plotly_white',
-            height=400
-        )
-        st.plotly_chart(fig_scatter, use_container_width=True)
+        sample_size = min(1500, len(df))
+        if sample_size > 0:
+            sample_df = df.sample(sample_size, random_state=42).copy()
+            sample_df['discount_rate_pct'] = (sample_df['discount_pct'] * 100).round(2)
+            
+            fig_scatter = px.scatter(
+                sample_df,
+                x='discount_rate_pct',
+                y='profit_margin_pct',
+                color='product_category',
+                opacity=0.65,
+                trendline="ols",
+                labels={'discount_rate_pct': 'Promotional Discount Applied (%)', 'profit_margin_pct': 'Profit Margin (%)'},
+                title="Margin Decay Correlation (Sampled Transactions)",
+                template='plotly_white',
+                height=420
+            )
+            fig_scatter.add_hline(y=0, line_dash="dash", line_color="red", annotation_text="Break-Even (0%)", annotation_position="bottom right")
+            st.plotly_chart(fig_scatter, use_container_width=True)
+        else:
+            st.info("No data available for selected filter combination.")
 
     with col_t3b:
         st.markdown("#### 🎛️ Interactive Discount Simulation")
