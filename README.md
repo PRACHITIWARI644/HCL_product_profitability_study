@@ -221,3 +221,5 @@ streamlit run dashboard/app.py
 - **Release Tag:** `v1.0.0`
 - **Features:** Complete coverage of Agile Epics D04-E01 through D04-E06.
 - **Verification:** All scripts, notebooks, figures, reports, and dashboards generated and validated.
+#   H C L _ p r o d u c t _ p r o f i t a b i l i t y _ s t u d y  
+ 
