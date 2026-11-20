@@ -1,0 +1,36 @@
+{
+  "dataset_name": "Product Category Profitability Study (Cleaned)",
+  "version": "1.0.0",
+  "data_source": "data/processed/cleaned_product_sales.xlsx",
+  "total_records": 8475,
+  "date_range": {
+    "start": "2023-01-01",
+    "end": "2024-12-30"
+  },
+  "dimensions": [
+    {"name": "order_id", "type": "string", "role": "Primary Key"},
+    {"name": "order_date", "type": "date", "role": "Date Hierarchy"},
+    {"name": "order_year", "type": "integer", "role": "Filter / Slicer"},
+    {"name": "order_quarter", "type": "string", "role": "Filter / Slicer"},
+    {"name": "order_month", "type": "string", "role": "Trend Axis"},
+    {"name": "store_id", "type": "string", "role": "Store Dimension"},
+    {"name": "region", "type": "string", "role": "Territory Slicer"},
+    {"name": "customer_id", "type": "string", "role": "Customer Dimension"},
+    {"name": "payment_mode", "type": "string", "role": "Payment Mode Slicer"},
+    {"name": "product_id", "type": "string", "role": "SKU Identifier"},
+    {"name": "product_name", "type": "string", "role": "Product Title"},
+    {"name": "product_category", "type": "string", "role": "Primary Category Dimension"}
+  ],
+  "measures": [
+    {"name": "quantity", "type": "integer", "aggregation": "SUM"},
+    {"name": "unit_price", "type": "decimal", "aggregation": "AVERAGE"},
+    {"name": "unit_cost", "type": "decimal", "aggregation": "AVERAGE"},
+    {"name": "discount_pct", "type": "percentage", "aggregation": "AVERAGE"},
+    {"name": "gross_revenue", "type": "currency", "aggregation": "SUM"},
+    {"name": "discount_amount", "type": "currency", "aggregation": "SUM"},
+    {"name": "revenue", "type": "currency", "aggregation": "SUM", "description": "Net Revenue"},
+    {"name": "cost", "type": "currency", "aggregation": "SUM", "description": "COGS"},
+    {"name": "profit", "type": "currency", "aggregation": "SUM", "description": "Gross Profit"},
+    {"name": "profit_margin_pct", "type": "percentage", "aggregation": "CALCULATED", "formula": "(Gross Profit / Net Revenue) * 100"}
+  ]
+}
